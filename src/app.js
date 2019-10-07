@@ -45,7 +45,8 @@ app.get('/help', (req, res) => {
 
 app.get('/weather', (req, res) => {
     if (!req.query.address) {
-        return res.send({
+        return res.status(200)
+            .send({
             error: "Please provide an address"
         })
     }
@@ -61,7 +62,8 @@ app.get('/weather', (req, res) => {
                     error: "Error!!!"})
             }
             
-            res.send({
+            res.status(200)
+                .send({
                 forecast: forecastData,
                 location,
                 address: req.query.address
@@ -70,18 +72,15 @@ app.get('/weather', (req, res) => {
     })
 })
 
-app.get('/products', (req, res) => {
-    if (!req.query.search) {
-        return res.send({
-            error: "You must provide a search term"
-        })
-    }
-    res.send({
+app.get('/products', (req, res, next) => {
+    if (!req.query.search): return next("You must provide a search term");
+    res.status(200)
+        .send({
         products: []
     })
 })
 
-app.get('/help/*', (req,res) => {
+app.get('/help/*', (req,res, next) => {
     res.render('404', {
         title: '404',
         name: 'Ramesh Gurung',
@@ -89,13 +88,20 @@ app.get('/help/*', (req,res) => {
     })
 })
 
-app.get('*', (req, res) => {
+app.get('*', (req, res, next) => {
     res.render('404', {
         title: '404',
         name: 'Ramesh Gurung',
         errorMessage: 'Page not found'
     })
 })
+
+ app.use((err, req, res, next) => {
+        console.log(err);
+        res.status(400)
+            .send({ success: false, message: err.message || err });
+      }
+    );
 
 app.listen(3000, () => {
     console.log('Server is up on port 3000')
